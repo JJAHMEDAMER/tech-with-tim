@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -18,6 +19,17 @@ var books = []book{
 	{Id: "2", Title: "Two Title", Author: "Two", Quantity: 55},
 	{Id: "3", Title: "Three Title", Author: "Three", Quantity: 5},
 	{Id: "4", Title: "Four Title", Author: "Four", Quantity: 6},
+}
+
+/* Helper functions */
+
+func getBookById(id string) (*book, error) {
+	for i := 0; i < len(books); i++ {
+		if books[i].Id == id {
+			return &books[i], nil
+		}
+	}
+	return nil, errors.New("no book is found")
 }
 
 func getBooks(c *gin.Context) {
@@ -66,5 +78,8 @@ func main() {
 
 	router.GET("/books", getBooks)
 	router.POST("/book", addBook)
+	router.GET("/book/:id", getBook)
+
+	// Start Server
 	router.Run("localhost:8080")
 }
