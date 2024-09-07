@@ -73,12 +73,45 @@ func getBook(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, book)
 }
 
+func checkInBook(c *gin.Context) {
+	// Get params from gin context
+	book, err := getBookById(c.Param("id"))
+
+	if err != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	book.Quantity++
+	c.IndentedJSON(http.StatusOK, book)
+}
+
+func checkOutBook(c *gin.Context) {
+	// Get params from gin context
+	book, err := getBookById(c.Param("id"))
+
+	if err != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	if book.Quantity == 0 {
+		c.IndentedJSON(http.StatusForbidden, gin.H{"error": "No books left to checkout"})
+		return
+	}
+
+	book.Quantity--
+	c.IndentedJSON(http.StatusOK, book)
+}
+
 func main() {
 	router := gin.Default()
 
 	router.GET("/books", getBooks)
 	router.POST("/book", addBook)
 	router.GET("/book/:id", getBook)
+	router.PUT("/book/checkout/:id", checkOutBook)
+	router.PUT("/book/check-in/:id", checkInBook)
 
 	// Start Server
 	router.Run("localhost:8080")
